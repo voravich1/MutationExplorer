@@ -10,6 +10,9 @@ import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.variantcontext.writer.VariantContextWriter;
 import htsjdk.variant.vcf.VCFFileReader;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -41,6 +44,7 @@ public class MutationUtility {
         int count = 0;
         
         MutationCluster dummy_cluster = new MutationCluster();
+        dummy_cluster.setMax_variant_size(range);
         
         while(vcf_info.hasNext()){  // loop all variant
             
@@ -86,6 +90,7 @@ public class MutationUtility {
                             save_cluster.addLeaderStart(dummy_cluster.getLeader_start());
                             save_cluster.addLeaderStop(dummy_cluster.getLeader_stop());
                             save_cluster.setCluster_chr(dummy_cluster.getCluster_chr());
+                            save_cluster.setMax_variant_size(range);
                             list_cluster.add(save_cluster);
                         }
 
@@ -103,6 +108,7 @@ public class MutationUtility {
                             dummy_cluster.addLeaderStart(leader_start);
                             dummy_cluster.addLeaderStop(leader_stop);
                             dummy_cluster.setCluster_chr(leader_chr);
+                            dummy_cluster.setMax_variant_size(range);
                         }else{
                             /*
                                 New var is far from leader but not far from other member
@@ -141,6 +147,7 @@ public class MutationUtility {
                                 dummy_cluster.addLeaderStart(leader_start);
                                 dummy_cluster.addLeaderStop(leader_stop);
                                 dummy_cluster.setCluster_chr(leader_chr);
+                                dummy_cluster.setMax_variant_size(range);
                             }
                         }  
                     }
@@ -156,6 +163,7 @@ public class MutationUtility {
                         save_cluster.addLeaderStart(dummy_cluster.getLeader_start());
                         save_cluster.addLeaderStop(dummy_cluster.getLeader_stop());
                         save_cluster.setCluster_chr(dummy_cluster.getCluster_chr());
+                        save_cluster.setMax_variant_size(range);
                         list_cluster.add(save_cluster);
                     }
                     
@@ -167,6 +175,7 @@ public class MutationUtility {
                     dummy_cluster.addLeaderStart(leader_start);
                     dummy_cluster.addLeaderStop(leader_stop);
                     dummy_cluster.setCluster_chr(leader_chr);
+                    dummy_cluster.setMax_variant_size(range);
                 }
                        
             }
@@ -187,6 +196,7 @@ public class MutationUtility {
         boolean firstFlag = true;
         int diff = 0;
         MutationSuperCluster super_cluster = new MutationSuperCluster();
+        super_cluster.setSuper_cluster_range(range);
         ArrayList<MutationSuperCluster> list_super_cluster = new ArrayList();
         
         for(MutationCluster mutation_cluster : list_cluster){
@@ -204,7 +214,7 @@ public class MutationUtility {
                      * SuperCluster and current mutationCluster has same chromosome
                      * Check diff btw SuperCluster and current mutation Cluster 
                      */
-                    diff = mutation_cluster.cluster_start - super_cluster.getSuperCluster_start();
+                    diff = mutation_cluster.getCluster_start() - super_cluster.getSuperCluster_start();
                     if(diff <= range){
                         /**
                          * Current mutation cluster is in rage of super cluster
@@ -222,6 +232,7 @@ public class MutationUtility {
                             MutationSuperCluster save_super_cluster = new MutationSuperCluster();
                             ArrayList<MutationCluster> dummy = new ArrayList<MutationCluster>(super_cluster.getList_mutation_cluster());
                             save_super_cluster.setList_mutation_cluster(dummy);
+                            save_super_cluster.setSuper_cluster_range(range);
                             list_super_cluster.add(save_super_cluster);
                         }
                         
@@ -233,6 +244,7 @@ public class MutationUtility {
                              */
                             super_cluster = new MutationSuperCluster();
                             super_cluster.addMutationCluster(mutation_cluster);
+                            super_cluster.setSuper_cluster_range(range);
                         }else{
                             /**
                              * Current mutation does not have diff exceed 2 time from super cluster
@@ -244,7 +256,7 @@ public class MutationUtility {
                                  * or until super cluster has single member
                                  */
                                 super_cluster.removeMutationCluster();
-                                diff = mutation_cluster.cluster_start - super_cluster.getSuperCluster_start();
+                                diff = mutation_cluster.getCluster_start() - super_cluster.getSuperCluster_start();
                                 if(diff <= range){
                                     super_cluster.addMutationCluster(mutation_cluster);
                                     break;
@@ -258,6 +270,7 @@ public class MutationUtility {
                                  */
                                 super_cluster = new MutationSuperCluster();
                                 super_cluster.addMutationCluster(mutation_cluster);
+                                super_cluster.setSuper_cluster_range(range);
                             }
                         }
                     }
@@ -271,11 +284,13 @@ public class MutationUtility {
                         MutationSuperCluster save_super_cluster = new MutationSuperCluster();
                         ArrayList<MutationCluster> dummy = new ArrayList<MutationCluster>(super_cluster.getList_mutation_cluster());
                         save_super_cluster.setList_mutation_cluster(dummy);
+                        save_super_cluster.setSuper_cluster_range(range);
                         list_super_cluster.add(save_super_cluster);
                     }
 
                     super_cluster = new MutationSuperCluster();
                     super_cluster.addMutationCluster(mutation_cluster);
+                    super_cluster.setSuper_cluster_range(range);
                 }               
             }
         }
@@ -284,6 +299,157 @@ public class MutationUtility {
             list_super_cluster.add(super_cluster);
         }
         return list_super_cluster;
-    } 
+    }
+    
+    public static void exportClusterToBed(ArrayList<MutationCluster> in_list_cluster, String fullPath_saveFileName) throws IOException{
+        
+        PrintStream ps;
+        FileWriter writer;        
+        /**
+         * Check File existing
+         */
+        
+        File f = new File(fullPath_saveFileName); //File object        
+        if(f.exists()){
+//            ps = new PrintStream(new FileOutputStream(filename,true));
+            writer = new FileWriter(fullPath_saveFileName,true);
+        }else{
+//            ps = new PrintStream(filename);
+            writer = new FileWriter(fullPath_saveFileName);
+        }
+        int count = 0;
+        writer.write("track useScore=1\n");
+        for(MutationCluster cluster : in_list_cluster){
+            String chr = cluster.getCluster_chr();
+            int start = cluster.getCluster_start();
+            int stop = cluster.getCluster_stop();
+            int score = cluster.getScore_for_bed();
+            count++;
+            String clusterName = "cluster"+count;
+            writer.write(chr + "\t" + start + "\t" + stop + "\t" + clusterName + "\t" + score +"\t" + "." + "\t" + start + "\t" + stop +"\n");
+        }
+
+        writer.flush();
+        writer.close();
+    }
+    
+    public static void exportSuperClusterToBed(ArrayList<MutationSuperCluster> in_list_super_cluster, String fullPath_saveFileName) throws IOException{
+        PrintStream ps;
+        FileWriter writer;        
+        /**
+         * Check File existing
+         */
+        
+        File f = new File(fullPath_saveFileName); //File object        
+        if(f.exists()){
+//            ps = new PrintStream(new FileOutputStream(filename,true));
+            writer = new FileWriter(fullPath_saveFileName,true);
+        }else{
+//            ps = new PrintStream(filename);
+            writer = new FileWriter(fullPath_saveFileName);
+        }
+        int count = 0;
+        writer.write("track useScore=1\n");
+        for(MutationSuperCluster superCluster : in_list_super_cluster){
+            String chr = superCluster.getSuperCluster_chr();
+            int start = superCluster.getSuperCluster_start();
+            int stop = superCluster.getSuperCluster_stop();
+            int score = superCluster.getScore_for_bed();
+            count++;
+            String superClusterName = "super_cluster"+count;
+            writer.write(chr + "\t" + start + "\t" + stop + "\t" + superClusterName + "\t" + score +"\t" + "." + "\t" + start + "\t" + stop +"\n");
+        }
+
+        writer.flush();
+        writer.close();
+    }
+    
+    public static void exportClusterToCSV(ArrayList<MutationCluster> list_cluster,String fullPath_saveFileName) throws IOException{
+        PrintStream ps;
+        FileWriter writer;        
+        /**
+         * Check File existing
+         */
+        
+        File f = new File(fullPath_saveFileName); //File object        
+        if(f.exists()){
+//            ps = new PrintStream(new FileOutputStream(filename,true));
+            writer = new FileWriter(fullPath_saveFileName,true);
+        }else{
+//            ps = new PrintStream(filename);
+            writer = new FileWriter(fullPath_saveFileName);
+        }
+        
+        String header = "ID,Chromosome,Start,Stop,Mutation Score,C>A,C>G,C>T,T>A,T>C,T>G,Other,Total mutation\n";
+        writer.write(header);
+        int count=0;
+        for(MutationCluster cluster : list_cluster){
+            String ID = "cluster"+(++count);
+            String chr = cluster.getCluster_chr();
+            int start = cluster.getCluster_start();
+            int stop = cluster.getCluster_stop();
+            int score = cluster.getScore_for_bed();
+            
+            cluster.countMutationSubstitution();
+            
+            int totalMutation = cluster.getTotal_alt_alleles();
+            int countCA = cluster.getCount_mutationCA();
+            int countCG = cluster.getCount_mutationCG();
+            int countCT = cluster.getCount_mutationCT();
+            int countTA = cluster.getCount_mutationTA();
+            int countTC = cluster.getCount_mutationTC();
+            int countTG = cluster.getCount_mutationTG();
+            int countOther = cluster.getCount_mutation_other();
+            
+            writer.write(ID+","+chr+","+start+","+stop+","+score+","+countCA+","+countCG+","+countCT+","+countTA+","+countTC+","+countTG+","+countOther+","+totalMutation+"\n");
+        }
+        
+        writer.flush();
+        writer.close();
+    }
+    
+    public static void exportSuperClusterToCSV(ArrayList<MutationSuperCluster> list_super_cluster,String fullPath_saveFileName) throws IOException{
+        PrintStream ps;
+        FileWriter writer;        
+        /**
+         * Check File existing
+         */
+        
+        File f = new File(fullPath_saveFileName); //File object        
+        if(f.exists()){
+//            ps = new PrintStream(new FileOutputStream(filename,true));
+            writer = new FileWriter(fullPath_saveFileName,true);
+        }else{
+//            ps = new PrintStream(filename);
+            writer = new FileWriter(fullPath_saveFileName);
+        }
+        
+        String header = "ID,Chromosome,Start,Stop,Mutation Score,C>A,C>G,C>T,T>A,T>C,T>G,Other,Total mutation\n";
+        writer.write(header);
+        int count=0;
+        for(MutationSuperCluster superCluster : list_super_cluster){
+            String ID = "superCluster"+(++count);
+            String chr = superCluster.getSuperCluster_chr();
+            int start = superCluster.getSuperCluster_start();
+            int stop = superCluster.getSuperCluster_stop();
+            int score = superCluster.getScore_for_bed();
+            
+            superCluster.countMutationSubstitutionV2();
+            
+            int totalMutation = superCluster.getTotal_alt_alleles();
+            int countCA = superCluster.getCount_mutationCA();
+            int countCG = superCluster.getCount_mutationCG();
+            int countCT = superCluster.getCount_mutationCT();
+            int countTA = superCluster.getCount_mutationTA();
+            int countTC = superCluster.getCount_mutationTC();
+            int countTG = superCluster.getCount_mutationTG();
+            int countOther = superCluster.getCount_mutation_other();
+            
+            writer.write(ID+","+chr+","+start+","+stop+","+score+","+countCA+","+countCG+","+countCT+","+countTA+","+countTC+","+countTG+","+countOther+","+totalMutation+"\n");
+        }
+        
+        writer.flush();
+        writer.close();
+    }
     
 }
