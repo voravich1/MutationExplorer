@@ -33,7 +33,8 @@ public class MutationExplorer {
      */
     public static void main(String[] args) throws IOException {
         // TODO code application logic here
-        String vcfFileName = "/Users/worawich/Download_dataset/Ratina_cancer/Mutect_dnabrick_result/set3_dnabrick/542_somatic.vcf";
+        String vcfFileName = "/Users/worawich/Download_dataset/Ratina_cancer/Mutect_dnabrick_result/set2_dnabrick/636_somatic.vcf";
+//        String vcfFileName = "/Users/worawich/Download_dataset/Ratina_cancer/Mutect_dnabrick_result/set3_dnabrick/542_somatic.vcf";
 //        String vcfFileName = "/Users/worawich/Download_dataset/Ratina_cancer/RB_somatic_vcf/277_somatic.vcf";
         int cluster_range = 100;
         int min_cluster_member = 5;
