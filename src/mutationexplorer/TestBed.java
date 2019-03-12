@@ -16,9 +16,9 @@ public class TestBed {
     public static void main(String[] args) throws IOException {
         
         String vcfFileName = "/Users/worawich/Download_dataset/Ratina_cancer/Manta_Normal_Tumor_Result/sumResult/208_somaticSV.vcf.gz";
+        String refFileName = "";
         
-        MutationUtility.readMantaVCF(vcfFileName);
-        
+        MutationUtility.analyseTrinucleotide(vcfFileName, refFileName);
        
         
     }

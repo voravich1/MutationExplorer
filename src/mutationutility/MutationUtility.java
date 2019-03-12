@@ -10,6 +10,7 @@ import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.variantcontext.writer.VariantContextWriter;
 import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.samtools.reference.FastaSequenceFile;
+import htsjdk.samtools.reference.ReferenceSequence;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -484,17 +485,22 @@ public class MutationUtility {
         /****************************/
         
         
-        
-        
-        
+        MutationSNV muSNV = new MutationSNV();
+       
         CloseableIterator<VariantContext> vcf_info = vcfReader.iterator();
         while(vcf_info.hasNext()){  // loop all variant
             
             VariantContext varctx = vcf_info.next();
             
+            int POS = varctx.getStart();
+            String contig = varctx.getContig();
+            ReferenceSequence leftBase = ref.getSubsequenceAt(contig, POS-1, POS-1);
+            ReferenceSequence rightBase = ref.getSubsequenceAt(contig, POS+1, POS+1);
+            
+            muSNV.addTrinucleotideVariantContext(leftBase.getBaseString(), rightBase.getBaseString(), varctx);
         }
         
-        
+        System.out.println(muSNV.exportTrinucleotideFrequencyCSV("CA"));   
     } 
     
 }

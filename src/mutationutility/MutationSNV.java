@@ -122,110 +122,218 @@ public class MutationSNV {
                 if(ref_base.equals("C") && alt_base.equals("A")){
                     
                     this.mutationCA.add(inVarCtx);
+                    
+                    /**
+                     * update trinucleotide matrix
+                     */
                     LinkedHashMap<String,ArrayList<VariantContext>> innerMap = this.trinucleotideMatrixCA.get(fivePrimeBase);
                     ArrayList<VariantContext> dummyVarList = innerMap.get(threePrimeBase);
                     dummyVarList.add(inVarCtx);
                     innerMap.put(threePrimeBase, dummyVarList);
                     this.trinucleotideMatrixCA.put(fivePrimeBase, innerMap);
-                    
+                    /******************************/
                     
                 }else if(ref_base.equals("G") && alt_base.equals("T")){
-                    this.count_mutationCA++;
+
+                    this.mutationCA.add(inVarCtx);
+                    
+                    /**
+                     * update trinucleotide matrix
+                     */
+                    LinkedHashMap<String,ArrayList<VariantContext>> innerMap = this.trinucleotideMatrixCA.get(fivePrimeBase);
+                    ArrayList<VariantContext> dummyVarList = innerMap.get(threePrimeBase);
+                    dummyVarList.add(inVarCtx);
+                    innerMap.put(threePrimeBase, dummyVarList);
+                    this.trinucleotideMatrixCA.put(fivePrimeBase, innerMap);
+                    /******************************/
+                    
                 }else if(ref_base.equals("C") && alt_base.equals("G")){
-                    this.count_mutationCG++;
+                   
+                    this.mutationCG.add(inVarCtx);
+                    
+                    /**
+                     * update trinucleotide matrix
+                     */
+                    LinkedHashMap<String,ArrayList<VariantContext>> innerMap = this.trinucleotideMatrixCG.get(fivePrimeBase);
+                    ArrayList<VariantContext> dummyVarList = innerMap.get(threePrimeBase);
+                    dummyVarList.add(inVarCtx);
+                    innerMap.put(threePrimeBase, dummyVarList);
+                    this.trinucleotideMatrixCG.put(fivePrimeBase, innerMap);
+                    /******************************/
+                    
                 }else if(ref_base.equals("G") && alt_base.equals("C")){
-                    this.count_mutationCG++;
+                    
+                    this.mutationCG.add(inVarCtx);
+                    
+                    /**
+                     * update trinucleotide matrix
+                     */
+                    LinkedHashMap<String,ArrayList<VariantContext>> innerMap = this.trinucleotideMatrixCG.get(fivePrimeBase);
+                    ArrayList<VariantContext> dummyVarList = innerMap.get(threePrimeBase);
+                    dummyVarList.add(inVarCtx);
+                    innerMap.put(threePrimeBase, dummyVarList);
+                    this.trinucleotideMatrixCG.put(fivePrimeBase, innerMap);
+                    /******************************/
+                    
                 }else if(ref_base.equals("C") && alt_base.equals("T")){
-                    this.count_mutationCT++;
+                    
+                    this.mutationCT.add(inVarCtx);
+                    
+                    /**
+                     * update trinucleotide matrix
+                     */
+                    LinkedHashMap<String,ArrayList<VariantContext>> innerMap = this.trinucleotideMatrixCT.get(fivePrimeBase);
+                    ArrayList<VariantContext> dummyVarList = innerMap.get(threePrimeBase);
+                    dummyVarList.add(inVarCtx);
+                    innerMap.put(threePrimeBase, dummyVarList);
+                    this.trinucleotideMatrixCT.put(fivePrimeBase, innerMap);
+                    /******************************/
+                    
                 }else if(ref_base.equals("G") && alt_base.equals("A")){
-                    this.count_mutationCT++;
+                    
+                    this.mutationCT.add(inVarCtx);
+                    
+                    /**
+                     * update trinucleotide matrix
+                     */
+                    LinkedHashMap<String,ArrayList<VariantContext>> innerMap = this.trinucleotideMatrixCT.get(fivePrimeBase);
+                    ArrayList<VariantContext> dummyVarList = innerMap.get(threePrimeBase);
+                    dummyVarList.add(inVarCtx);
+                    innerMap.put(threePrimeBase, dummyVarList);
+                    this.trinucleotideMatrixCT.put(fivePrimeBase, innerMap);
+                    /******************************/
+                    
                 }else if(ref_base.equals("T") && alt_base.equals("A")){
-                    this.count_mutationTA++;
+                    
+                    this.mutationTA.add(inVarCtx);
+                    
+                    /**
+                     * update trinucleotide matrix
+                     */
+                    LinkedHashMap<String,ArrayList<VariantContext>> innerMap = this.trinucleotideMatrixTA.get(fivePrimeBase);
+                    ArrayList<VariantContext> dummyVarList = innerMap.get(threePrimeBase);
+                    dummyVarList.add(inVarCtx);
+                    innerMap.put(threePrimeBase, dummyVarList);
+                    this.trinucleotideMatrixTA.put(fivePrimeBase, innerMap);
+                    /******************************/
+                    
                 }else if(ref_base.equals("A") && alt_base.equals("T")){
-                    this.count_mutationTA++;
+                    
+                    this.mutationTA.add(inVarCtx);
+                    
+                    /**
+                     * update trinucleotide matrix
+                     */
+                    LinkedHashMap<String,ArrayList<VariantContext>> innerMap = this.trinucleotideMatrixTA.get(fivePrimeBase);
+                    ArrayList<VariantContext> dummyVarList = innerMap.get(threePrimeBase);
+                    dummyVarList.add(inVarCtx);
+                    innerMap.put(threePrimeBase, dummyVarList);
+                    this.trinucleotideMatrixTA.put(fivePrimeBase, innerMap);
+                    /******************************/
+                    
                 }else if(ref_base.equals("T") && alt_base.equals("C")){
-                    this.count_mutationTC++;
+                    
+                    this.mutationTC.add(inVarCtx);
+                    
+                    /**
+                     * update trinucleotide matrix
+                     */
+                    LinkedHashMap<String,ArrayList<VariantContext>> innerMap = this.trinucleotideMatrixTC.get(fivePrimeBase);
+                    ArrayList<VariantContext> dummyVarList = innerMap.get(threePrimeBase);
+                    dummyVarList.add(inVarCtx);
+                    innerMap.put(threePrimeBase, dummyVarList);
+                    this.trinucleotideMatrixTC.put(fivePrimeBase, innerMap);
+                    /******************************/
+                    
                 }else if(ref_base.equals("A") && alt_base.equals("G")){
-                    this.count_mutationTC++;
+                    
+                    this.mutationTC.add(inVarCtx);
+                    
+                    /**
+                     * update trinucleotide matrix
+                     */
+                    LinkedHashMap<String,ArrayList<VariantContext>> innerMap = this.trinucleotideMatrixTC.get(fivePrimeBase);
+                    ArrayList<VariantContext> dummyVarList = innerMap.get(threePrimeBase);
+                    dummyVarList.add(inVarCtx);
+                    innerMap.put(threePrimeBase, dummyVarList);
+                    this.trinucleotideMatrixTC.put(fivePrimeBase, innerMap);
+                    /******************************/
+                    
                 }else if(ref_base.equals("T") && alt_base.equals("G")){
-                    this.count_mutationTG++;
+                    
+                    this.mutationTG.add(inVarCtx);
+                    
+                    /**
+                     * update trinucleotide matrix
+                     */
+                    LinkedHashMap<String,ArrayList<VariantContext>> innerMap = this.trinucleotideMatrixTG.get(fivePrimeBase);
+                    ArrayList<VariantContext> dummyVarList = innerMap.get(threePrimeBase);
+                    dummyVarList.add(inVarCtx);
+                    innerMap.put(threePrimeBase, dummyVarList);
+                    this.trinucleotideMatrixTG.put(fivePrimeBase, innerMap);
+                    /******************************/
+                    
                 }else if(ref_base.equals("A") && alt_base.equals("C")){
-                    this.count_mutationTG++;
-                }else{
-                    this.count_mutation_other++;
-                }                   
+                    
+                    this.mutationTG.add(inVarCtx);
+                    
+                    /**
+                     * update trinucleotide matrix
+                     */
+                    LinkedHashMap<String,ArrayList<VariantContext>> innerMap = this.trinucleotideMatrixTG.get(fivePrimeBase);
+                    ArrayList<VariantContext> dummyVarList = innerMap.get(threePrimeBase);
+                    dummyVarList.add(inVarCtx);
+                    innerMap.put(threePrimeBase, dummyVarList);
+                    this.trinucleotideMatrixTG.put(fivePrimeBase, innerMap);
+                    /******************************/
+                    
+                }                
             }
         }  
     }
     
-    public void putTrinucleotideMatrix(String threePrimeBase, String fivePrimeBase, VariantContext inVarCtx){       
-        LinkedHashMap<String,ArrayList<VariantContext>> innerMap = this.trinucleotideMatrix.get(fivePrimeBase);
-        ArrayList<VariantContext> dummyVarList = innerMap.get(threePrimeBase);
-        dummyVarList.add(inVarCtx);
-        innerMap.put(threePrimeBase, dummyVarList);
-        this.trinucleotideMatrixCA.put(fivePrimeBase, innerMap);
-    }
-    
-    public void addVariantContext(String inREF, String inALT, VariantContext inCtx){
-        this.mutationType = this.REF + ">" + this.ALT;
+    //public void putTrinucleotideMatrix(String threePrimeBase, String fivePrimeBase, VariantContext inVarCtx){       
+        //LinkedHashMap<String,ArrayList<VariantContext>> innerMap = this.trinucleotideMatrix.get(fivePrimeBase);
+        //ArrayList<VariantContext> dummyVarList = innerMap.get(threePrimeBase);
+        //dummyVarList.add(inVarCtx);
+        //innerMap.put(threePrimeBase, dummyVarList);
+        //this.trinucleotideMatrixCA.put(fivePrimeBase, innerMap);
+    //}
+
+    public String exportTrinucleotideFrequencyCSV(String mutationType){
+        /**
+         * 6 mutationType : C>A => CA, C>G => CG, C>T => CT, T>A => TA, T>C => TC=>, T>G => TG
+         */
+        LinkedHashMap<String,LinkedHashMap<String,ArrayList<VariantContext>>> selectedMatrix = new LinkedHashMap();
         
-        List<Allele> list_alleles = inCtx.getAlleles();
-        String ref_base = inCtx.getReference().getBaseString().toUpperCase();
-
-        for(Allele ale : list_alleles){
-            if(ale.isNonReference()){
-                this.total_alt_alleles++;
-                String alt_base = ale.getBaseString().toUpperCase();
-
-                if(ref_base.equals("C") && alt_base.equals("A")){
-                    this.count_mutationCA++;
-                    this.mutationCA.add(inCtx);
-                    
-                }else if(ref_base.equals("G") && alt_base.equals("T")){
-                    this.count_mutationCA++;
-                }else if(ref_base.equals("C") && alt_base.equals("G")){
-                    this.count_mutationCG++;
-                }else if(ref_base.equals("G") && alt_base.equals("C")){
-                    this.count_mutationCG++;
-                }else if(ref_base.equals("C") && alt_base.equals("T")){
-                    this.count_mutationCT++;
-                }else if(ref_base.equals("G") && alt_base.equals("A")){
-                    this.count_mutationCT++;
-                }else if(ref_base.equals("T") && alt_base.equals("A")){
-                    this.count_mutationTA++;
-                }else if(ref_base.equals("A") && alt_base.equals("T")){
-                    this.count_mutationTA++;
-                }else if(ref_base.equals("T") && alt_base.equals("C")){
-                    this.count_mutationTC++;
-                }else if(ref_base.equals("A") && alt_base.equals("G")){
-                    this.count_mutationTC++;
-                }else if(ref_base.equals("T") && alt_base.equals("G")){
-                    this.count_mutationTG++;
-                }else if(ref_base.equals("A") && alt_base.equals("C")){
-                    this.count_mutationTG++;
-                }else{
-                    this.count_mutation_other++;
-                }                   
-            }
+        if(mutationType.equals("CA")){
+            selectedMatrix = this.trinucleotideMatrixCA;
+        }else if(mutationType.equals("CG")){
+            selectedMatrix = this.trinucleotideMatrixCG;
+        }else if(mutationType.equals("CT")){
+            selectedMatrix = this.trinucleotideMatrixCT;
+        }else if(mutationType.equals("TA")){
+            selectedMatrix = this.trinucleotideMatrixTA;
+        }else if(mutationType.equals("TC")){
+            selectedMatrix = this.trinucleotideMatrixTC;
+        }else if(mutationType.equals("TG")){
+            selectedMatrix = this.trinucleotideMatrixTG;
         }
         
+        String csvData = "Mutation type = " + mutationType + " [x axis = 3' base,y axis = 5' base]"
+                + "\n5'\3',A,C,G,T";
         
-    }
-    
-    public String exportTrinucleotideFrequencyCSV(){
-        
-        String csvExport = "x axis = 3' base,y axis = 5' base";
-        
-        for(Map.Entry<String, LinkedHashMap<String,ArrayList<VariantContext>>> outer_entry : this.trinucleotideMatrix.entrySet()){
+        for(Map.Entry<String, LinkedHashMap<String,ArrayList<VariantContext>>> outer_entry : selectedMatrix.entrySet()){
+            String fivePrimeBase = outer_entry.getKey();
+            csvData = csvData + "\n" + fivePrimeBase;
             
             LinkedHashMap<String, ArrayList<VariantContext>> innerMap = outer_entry.getValue();
             for(Map.Entry<String,ArrayList<VariantContext>> inner_entry : innerMap.entrySet()){
-                
-            }
-            
-        }
-//        this.trinucleotideMatrix.
-        
-        return null;
+                String threePrimeBase = inner_entry.getKey();
+                ArrayList<VariantContext> varList = inner_entry.getValue();
+                csvData = csvData + "," + varList.size();
+            }   
+        }      
+        return csvData;
     }
 }
