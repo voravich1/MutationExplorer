@@ -9,6 +9,7 @@ import htsjdk.samtools.util.CloseableIterator;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.variantcontext.writer.VariantContextWriter;
 import htsjdk.variant.vcf.VCFFileReader;
+import htsjdk.samtools.reference.FastaSequenceFile;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -451,5 +452,49 @@ public class MutationUtility {
         writer.flush();
         writer.close();
     }
+    
+    public static void readMantaVCF(String vcfFileName){
+        File vcf_File = new File(vcfFileName);
+        VCFFileReader vcf = new VCFFileReader(vcf_File);
+        
+        CloseableIterator<VariantContext> vcf_Iter = vcf.iterator();
+        
+        while(vcf_Iter.hasNext()){      // loop all variant
+            VariantContext vcfContext = vcf_Iter.next();    
+            
+            vcfContext.getAllele(vcfFileName);
+            
+        }
+    }
+    
+    public static void analyseTrinucleotide(String vcfFilePath, String refFilePath){
+        
+        /**
+         * Read reference fasta file
+         */
+        File ref_File = new File(refFilePath);
+        FastaSequenceFile ref = new FastaSequenceFile(ref_File,true);
+        /****************************/
+        
+        /**
+         * Read vcf file
+         */
+        File vcf_File = new File(vcfFilePath);
+        VCFFileReader vcfReader = new VCFFileReader(vcf_File);
+        /****************************/
+        
+        
+        
+        
+        
+        CloseableIterator<VariantContext> vcf_info = vcfReader.iterator();
+        while(vcf_info.hasNext()){  // loop all variant
+            
+            VariantContext varctx = vcf_info.next();
+            
+        }
+        
+        
+    } 
     
 }
