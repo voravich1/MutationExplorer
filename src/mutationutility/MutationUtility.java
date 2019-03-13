@@ -10,8 +10,10 @@ import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.variantcontext.writer.VariantContextWriter;
 import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.samtools.reference.FastaSequenceFile;
+import htsjdk.samtools.reference.IndexedFastaSequenceFile;
 import htsjdk.samtools.reference.ReferenceSequence;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -468,13 +470,14 @@ public class MutationUtility {
         }
     }
     
-    public static void analyseTrinucleotide(String vcfFilePath, String refFilePath){
+    public static MutationSNV analyseTrinucleotide(String vcfFilePath, String refFilePath) throws FileNotFoundException{
         
         /**
          * Read reference fasta file
          */
         File ref_File = new File(refFilePath);
-        FastaSequenceFile ref = new FastaSequenceFile(ref_File,true);
+        IndexedFastaSequenceFile ref = new IndexedFastaSequenceFile(ref_File);
+//        FastaSequenceFile ref = new FastaSequenceFile(ref_File,true);
         /****************************/
         
         /**
@@ -483,9 +486,9 @@ public class MutationUtility {
         File vcf_File = new File(vcfFilePath);
         VCFFileReader vcfReader = new VCFFileReader(vcf_File);
         /****************************/
+        String name_of_file = vcf_File.getName();
         
-        
-        MutationSNV muSNV = new MutationSNV();
+        MutationSNV muSNV = new MutationSNV(name_of_file);
        
         CloseableIterator<VariantContext> vcf_info = vcfReader.iterator();
         while(vcf_info.hasNext()){  // loop all variant
@@ -499,8 +502,7 @@ public class MutationUtility {
             
             muSNV.addTrinucleotideVariantContext(leftBase.getBaseString(), rightBase.getBaseString(), varctx);
         }
-        
-        System.out.println(muSNV.exportTrinucleotideFrequencyCSV("CA"));   
-    } 
+        return muSNV;
+    }
     
 }

@@ -15,11 +15,12 @@ public class TestBed {
     
     public static void main(String[] args) throws IOException {
         
-        String vcfFileName = "/Users/worawich/Download_dataset/Ratina_cancer/Manta_Normal_Tumor_Result/sumResult/208_somaticSV.vcf.gz";
-        String refFileName = "";
+        String vcfFileName = "/Users/worawich/Download_dataset/Ratina_cancer/Mutect_dnabrick_result/set1_dnabrick/555_somatic.vcf";
+        String refFileName = "/Users/worawich/Reference/hg19_ucsc/ucsc.hg19.fa";
+        String saveFile = "/Users/worawich/Download_dataset/Ratina_cancer/Mutect_dnabrick_result/set1_dnabrick/555_trinucleotide.csv";
         
-        MutationUtility.analyseTrinucleotide(vcfFileName, refFileName);
-       
+        MutationSNV muSNV = MutationUtility.analyseTrinucleotide(vcfFileName, refFileName);
+        muSNV.exportTrinucleotideFrequencyToCSVFile(saveFile);
         
     }
 }
