@@ -27,6 +27,9 @@ import java.util.Collections;
 public class MutationUtility {
     
     public static ArrayList<MutationCluster> SearchMutationCluster(String vcfFile, int range, int cluster_size_filter){
+        /**
+         * V1 will search cluster with possibility overlap member 
+         */
         
         File vcf_File = new File(vcfFile);
         VCFFileReader vcfReader = new VCFFileReader(vcf_File);
@@ -195,8 +198,152 @@ public class MutationUtility {
         return list_cluster; 
     }
     
-    public static ArrayList<MutationSuperCluster> SearchSuperMutationCluster(ArrayList<MutationCluster> list_cluster, int range, int cluster_size_filter){
+    public static ArrayList<MutationCluster> SearchMutationClusterV2(String vcfFile, int range, int cluster_size_filter){
+        /**
+         * V2 will search cluster with no overlap member
+         */
         
+        
+        File vcf_File = new File(vcfFile);
+        VCFFileReader vcfReader = new VCFFileReader(vcf_File);
+        CloseableIterator<VariantContext> vcf_info = vcfReader.iterator();
+        
+        ArrayList<MutationCluster> list_cluster = new ArrayList();
+        
+        int leader_start = 0;
+        int leader_stop = 0;
+        
+        int member_start = 0;
+        int member_stop = 0;
+        
+        String leader_chr = "";
+        String member_chr = "";
+        
+        int diff = 0;
+        
+        int count = 0;
+        
+        MutationCluster dummy_cluster = new MutationCluster();
+        dummy_cluster.setMax_variant_size(range);
+        
+        while(vcf_info.hasNext()){  // loop all variant
+            
+            VariantContext varctx = vcf_info.next();
+            
+            if(count==0){
+                /**
+                 * For first time
+                 * add variantContext to cluster
+                 */
+//                leader_start = varctx.getStart();
+//                leader_stop = varctx.getEnd();
+//                leader_chr = varctx.getContig();
+                dummy_cluster.addVariant(varctx);
+//                dummy_cluster.addLeaderStart(leader_start);
+//                dummy_cluster.addLeaderStop(leader_stop);
+//                dummy_cluster.setCluster_chr(leader_chr);
+                count=1;
+            }else{
+                /**
+                 * For other line
+                 */
+                member_start = varctx.getStart();
+                member_stop = varctx.getEnd();
+                member_chr = varctx.getContig();
+                diff = member_start - dummy_cluster.getCluster_stop();
+//                if(dummy_cluster.getCluster_start() == 2586352){
+//                    System.out.println();
+//                }
+                if(dummy_cluster.getCluster_chr().equals(member_chr)){
+                    /**
+                     * leader and current var has the same chromosome
+                     * Check position
+                     */
+                    if(diff <= range){
+                        dummy_cluster.addVariant(varctx);
+//                        /**
+//                         * Get member
+//                         * use new member as leader
+//                         * update leader info
+//                         */
+//                        leader_start = varctx.getStart();
+//                        leader_stop = varctx.getEnd();
+//                        leader_chr = varctx.getContig();
+//                        dummy_cluster.addVariant(varctx);
+//                        dummy_cluster.addLeaderStart(leader_start);
+//                        dummy_cluster.addLeaderStop(leader_stop);
+//                        dummy_cluster.setCluster_chr(leader_chr);
+//                        /***************************/
+                    }else{
+                        /*
+                            New var not match with leader of cluster
+                            Save old cluster and create new cluster (save only cluster that has member more than 1)
+                        */
+                        if(dummy_cluster.getClusterSize() >= cluster_size_filter){
+                            MutationCluster save_cluster = new MutationCluster();
+                            ArrayList<VariantContext> save_cluster_list = new ArrayList<VariantContext>(dummy_cluster.getVarList());
+                            save_cluster.setVarList(save_cluster_list);
+//                            save_cluster.addLeaderStart(dummy_cluster.getLeader_start());
+//                            save_cluster.addLeaderStop(dummy_cluster.getLeader_stop());
+//                            save_cluster.setCluster_chr(dummy_cluster.getCluster_chr());
+                            save_cluster.setMax_variant_size(range);
+                            list_cluster.add(save_cluster);
+                        }
+                        
+//                        leader_start = member_start;
+//                        leader_stop = member_stop;
+//                        leader_chr = member_chr;
+                        dummy_cluster = new MutationCluster();
+                        dummy_cluster.addVariant(varctx);
+//                        dummy_cluster.addLeaderStart(leader_start);
+//                        dummy_cluster.addLeaderStop(leader_stop);
+//                        dummy_cluster.setCluster_chr(leader_chr);
+                        dummy_cluster.setMax_variant_size(range);
+                        
+                    }
+                }else{
+                    /**
+                     * leader and current var has different in chromosome
+                     * Save cluster and create new cluster using current var as leader
+                     */
+                    if(dummy_cluster.getClusterSize() >= cluster_size_filter){
+                        MutationCluster save_cluster = new MutationCluster();
+                        ArrayList<VariantContext> save_cluster_list = new ArrayList<VariantContext>(dummy_cluster.getVarList());
+                        save_cluster.setVarList(save_cluster_list);
+//                        save_cluster.addLeaderStart(dummy_cluster.getLeader_start());
+//                        save_cluster.addLeaderStop(dummy_cluster.getLeader_stop());
+//                        save_cluster.setCluster_chr(dummy_cluster.getCluster_chr());
+                        save_cluster.setMax_variant_size(range);
+                        list_cluster.add(save_cluster);
+                    }
+                    
+//                    leader_start = member_start;
+//                    leader_stop = member_stop;
+//                    leader_chr = member_chr;
+                    dummy_cluster = new MutationCluster();
+                    dummy_cluster.addVariant(varctx);
+//                    dummy_cluster.addLeaderStart(leader_start);
+//                    dummy_cluster.addLeaderStop(leader_stop);
+//                    dummy_cluster.setCluster_chr(leader_chr);
+                    dummy_cluster.setMax_variant_size(range);
+                }           
+            }
+        }
+        /**
+         * Save last cluster
+         */
+        if(dummy_cluster.getClusterSize() >= cluster_size_filter){
+            list_cluster.add(dummy_cluster);
+        }
+        
+        System.out.print("done");
+        return list_cluster; 
+    }
+    
+    public static ArrayList<MutationSuperCluster> SearchSuperMutationCluster(ArrayList<MutationCluster> list_cluster, int range, int cluster_size_filter){
+        /**
+         * V1 search super cluster with possibility to have overlap member
+         */
         boolean firstFlag = true;
         int diff = 0;
         MutationSuperCluster super_cluster = new MutationSuperCluster();
@@ -305,6 +452,84 @@ public class MutationUtility {
         return list_super_cluster;
     }
     
+    public static ArrayList<MutationSuperCluster> SearchSuperMutationClusterV2(ArrayList<MutationCluster> list_cluster, int range, int cluster_size_filter){
+        /**
+         * V2 search super cluster with no overlap member
+         */
+        boolean firstFlag = true;
+        int diff = 0;
+        MutationSuperCluster super_cluster = new MutationSuperCluster();
+        super_cluster.setSuper_cluster_range(range);
+        ArrayList<MutationSuperCluster> list_super_cluster = new ArrayList();
+        
+        for(MutationCluster mutation_cluster : list_cluster){
+            
+            if(firstFlag == true){
+                /**
+                 * First Time 
+                 * create new super cluster and add current mutation cluster as leader
+                 */
+                super_cluster.addMutationCluster(mutation_cluster);
+                firstFlag = false;
+            }else{
+                if(super_cluster.getSuperCluster_chr().equals(mutation_cluster.getCluster_chr())){
+                    /**
+                     * SuperCluster and current mutationCluster has same chromosome
+                     * Check diff btw SuperCluster and current mutation Cluster 
+                     */
+                    diff = mutation_cluster.getCluster_start() - super_cluster.getSuperCluster_stop();
+                    if(diff <= range){
+                        /**
+                         * Current mutation cluster is in rage of super cluster
+                         * add to super cluster
+                         */
+                        super_cluster.addMutationCluster(mutation_cluster);
+                    }else{
+                        /**
+                         * Current mutation cluster is not in range of super cluster
+                         * Save super cluster
+                         * create new Super Cluster add current cluster
+                         */
+                        if(super_cluster.getClusterSize() >= cluster_size_filter){
+                            MutationSuperCluster save_super_cluster = new MutationSuperCluster();
+                            ArrayList<MutationCluster> dummy = new ArrayList<MutationCluster>(super_cluster.getList_mutation_cluster());
+                            save_super_cluster.setList_mutation_cluster(dummy);
+                            save_super_cluster.setSuper_cluster_range(range);
+                            list_super_cluster.add(save_super_cluster);
+                        }
+                        
+                        super_cluster = new MutationSuperCluster();
+                        super_cluster.addMutationCluster(mutation_cluster);
+                        super_cluster.setSuper_cluster_range(range);
+                        
+                    }
+                }else{
+                    /**
+                     * SuperCluster and current mutationCluster has different chromosome
+                     * Save Super cluster (if it has member more that cluster size filter)
+                     * and Create new Super Cluster and add current cluster 
+                     */
+                    if(super_cluster.getClusterSize() >= cluster_size_filter){
+                        MutationSuperCluster save_super_cluster = new MutationSuperCluster();
+                        ArrayList<MutationCluster> dummy = new ArrayList<MutationCluster>(super_cluster.getList_mutation_cluster());
+                        save_super_cluster.setList_mutation_cluster(dummy);
+                        save_super_cluster.setSuper_cluster_range(range);
+                        list_super_cluster.add(save_super_cluster);
+                    }
+
+                    super_cluster = new MutationSuperCluster();
+                    super_cluster.addMutationCluster(mutation_cluster);
+                    super_cluster.setSuper_cluster_range(range);
+                }               
+            }
+        }
+        
+        if(super_cluster.getClusterSize() >= cluster_size_filter){
+            list_super_cluster.add(super_cluster);
+        }
+        return list_super_cluster;
+    }
+    
     public static void exportClusterToBed(ArrayList<MutationCluster> in_list_cluster, String fullPath_saveFileName) throws IOException{
         
         PrintStream ps;
@@ -316,7 +541,7 @@ public class MutationUtility {
         File f = new File(fullPath_saveFileName); //File object        
         if(f.exists()){
 //            ps = new PrintStream(new FileOutputStream(filename,true));
-            writer = new FileWriter(fullPath_saveFileName,true);
+            writer = new FileWriter(fullPath_saveFileName,false);
         }else{
 //            ps = new PrintStream(filename);
             writer = new FileWriter(fullPath_saveFileName);
@@ -347,7 +572,7 @@ public class MutationUtility {
         File f = new File(fullPath_saveFileName); //File object        
         if(f.exists()){
 //            ps = new PrintStream(new FileOutputStream(filename,true));
-            writer = new FileWriter(fullPath_saveFileName,true);
+            writer = new FileWriter(fullPath_saveFileName,false);
         }else{
 //            ps = new PrintStream(filename);
             writer = new FileWriter(fullPath_saveFileName);
@@ -378,7 +603,7 @@ public class MutationUtility {
         File f = new File(fullPath_saveFileName); //File object        
         if(f.exists()){
 //            ps = new PrintStream(new FileOutputStream(filename,true));
-            writer = new FileWriter(fullPath_saveFileName,true);
+            writer = new FileWriter(fullPath_saveFileName,false);
         }else{
 //            ps = new PrintStream(filename);
             writer = new FileWriter(fullPath_saveFileName);
@@ -422,7 +647,7 @@ public class MutationUtility {
         File f = new File(fullPath_saveFileName); //File object        
         if(f.exists()){
 //            ps = new PrintStream(new FileOutputStream(filename,true));
-            writer = new FileWriter(fullPath_saveFileName,true);
+            writer = new FileWriter(fullPath_saveFileName,false);
         }else{
 //            ps = new PrintStream(filename);
             writer = new FileWriter(fullPath_saveFileName);

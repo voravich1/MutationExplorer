@@ -50,7 +50,8 @@ public class MutationCluster {
     public void setVarList(ArrayList<VariantContext> varList) {
         this.varList = varList;
         this.cluster_start = varList.get(0).getStart();
-        this.cluster_stop = varList.get(varList.size()-1).getEnd();        
+        this.cluster_stop = varList.get(varList.size()-1).getEnd();
+        this.cluster_chr = varList.get(0).getContig();        
     }
 
     public int getCount_mutation_other() {
@@ -146,6 +147,7 @@ public class MutationCluster {
         this.varList.add(in_var);
         this.cluster_start = varList.get(0).getStart();
         this.cluster_stop = varList.get(varList.size()-1).getEnd();
+        this.cluster_chr = varList.get(0).getContig();
     }
 
     public void addLeaderStart(int leader_start) {
@@ -163,6 +165,7 @@ public class MutationCluster {
         this.leader_stop = varctx.getEnd();
         this.cluster_start = varList.get(0).getStart();
         this.cluster_stop = varList.get(varList.size()-1).getEnd();
+        this.cluster_chr = varList.get(0).getContig();
     }
     
     public void countMutationSubstitution(){

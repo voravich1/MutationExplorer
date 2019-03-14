@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import mutationutility.MutationCluster;
+import mutationutility.MutationSNV;
 import mutationutility.MutationSuperCluster;
 import mutationutility.MutationUtility;
 
@@ -33,12 +34,15 @@ public class MutationExplorer {
      */
     public static void main(String[] args) throws IOException {
         // TODO code application logic here
-        String vcfFileName = "/Users/worawich/Download_dataset/Ratina_cancer/Mutect_dnabrick_result/set2_dnabrick/636_somatic.vcf";
+//        String vcfFileName = "/Users/worawich/Download_dataset/Ratina_cancer/Mutect_dnabrick_result/set3_dnabrick/208_somatic.vcf";
+//        String refFileName = "/Users/worawich/Reference/hg19_ucsc/ucsc.hg19.fa";
+        String refFileName = args[0];        
+        String vcfFileName = args[1];        
 //        String vcfFileName = "/Users/worawich/Download_dataset/Ratina_cancer/Mutect_dnabrick_result/set3_dnabrick/542_somatic.vcf";
 //        String vcfFileName = "/Users/worawich/Download_dataset/Ratina_cancer/RB_somatic_vcf/277_somatic.vcf";
         int cluster_range = 100;
         int min_cluster_member = 5;
-        int super_cluster_range = 10000;
+        int super_cluster_range = 1000;
         int min_super_cluster_member = 2;
         
         File input_file = new File(vcfFileName);
@@ -49,6 +53,7 @@ public class MutationExplorer {
         String bed_SuperCluster_saveFileName = path+"/"+sampleName+"_super_cluster.bed";
         String csv_cluster_saveFileName = path+"/"+sampleName+"_cluster.csv";
         String csv_SuperCluster_saveFileName = path+"/"+sampleName+"_super_cluster.csv";
+        String csv_trinucleotide_analysis_aveFileName = path+"/"+sampleName+"_trinucleotide.csv";
 //        File vcf_File = new File(vcfFileName);
 //        VCFFileReader vcfReader = new VCFFileReader(vcf_File);
 //        CloseableIterator<VariantContext> vc = vcfReader.query("Chromosome", 6000, 7000);
@@ -97,12 +102,16 @@ public class MutationExplorer {
 //            
 //        }
         
-        ArrayList<MutationCluster> list_cluster = MutationUtility.SearchMutationCluster(vcfFileName,cluster_range,min_cluster_member);
-        ArrayList<MutationSuperCluster> list_super_cluster = MutationUtility.SearchSuperMutationCluster(list_cluster, super_cluster_range, min_super_cluster_member);
+        ArrayList<MutationCluster> list_cluster = MutationUtility.SearchMutationClusterV2(vcfFileName,cluster_range,min_cluster_member);
+        ArrayList<MutationSuperCluster> list_super_cluster = MutationUtility.SearchSuperMutationClusterV2(list_cluster, super_cluster_range, min_super_cluster_member);
         MutationUtility.exportClusterToBed(list_cluster, bed_saveFileName);
         MutationUtility.exportSuperClusterToBed(list_super_cluster, bed_SuperCluster_saveFileName);
         MutationUtility.exportClusterToCSV(list_cluster, csv_cluster_saveFileName);
         MutationUtility.exportSuperClusterToCSV(list_super_cluster, csv_SuperCluster_saveFileName);
+
+        MutationSNV muSNV = MutationUtility.analyseTrinucleotide(vcfFileName, refFileName);
+        muSNV.exportTrinucleotideFrequencyToCSVFile(csv_trinucleotide_analysis_aveFileName);
+        
         System.out.println();
         
     }
