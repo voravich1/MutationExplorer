@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import mutationutility.MutationCluster;
 import mutationutility.MutationSNV;
 import mutationutility.MutationSuperCluster;
@@ -37,82 +38,97 @@ public class MutationExplorer {
 //        String vcfFileName = "/Users/worawich/Download_dataset/Ratina_cancer/Mutect_dnabrick_result/set3_dnabrick/208_somatic.vcf";
 //        String refFileName = "/Users/worawich/Reference/hg19_ucsc/ucsc.hg19.fa";
         String refFileName = args[0];        
-        String vcfFileName = args[1];        
+        String vcfFileFolder = args[1];
+
+        File vcfDir = new File(vcfFileFolder);
+        final FileNameExtensionFilter extensionFilter = new FileNameExtensionFilter("vcf only","vcf");
+        if(vcfDir.isDirectory()){
+            
+        }else{
+            System.out.println("ERROR: Iput is not directory. Please specify vcf file directory");
+            System.exit(1);
+        }
+        
+        for (final File input_file : vcfDir.listFiles()) {
+            if(extensionFilter.accept(input_file) && !input_file.isDirectory()) {
+
+            String vcfFileName = input_file.getAbsolutePath();
+
+        
 //        String vcfFileName = "/Users/worawich/Download_dataset/Ratina_cancer/Mutect_dnabrick_result/set3_dnabrick/542_somatic.vcf";
 //        String vcfFileName = "/Users/worawich/Download_dataset/Ratina_cancer/RB_somatic_vcf/277_somatic.vcf";
-        int cluster_range = 100;
-        int min_cluster_member = 5;
-        int super_cluster_range = 1000;
-        int min_super_cluster_member = 2;
-        
-        File input_file = new File(vcfFileName);
-        String file_name = input_file.getName();
-        String sampleName = file_name.split("_")[0];
-        String path = input_file.getParent();
-        String bed_saveFileName = path+"/"+sampleName+"_cluster.bed";
-        String bed_SuperCluster_saveFileName = path+"/"+sampleName+"_super_cluster.bed";
-        String csv_cluster_saveFileName = path+"/"+sampleName+"_cluster.csv";
-        String csv_SuperCluster_saveFileName = path+"/"+sampleName+"_super_cluster.csv";
-        String csv_trinucleotide_analysis_aveFileName = path+"/"+sampleName+"_trinucleotide.csv";
-//        File vcf_File = new File(vcfFileName);
-//        VCFFileReader vcfReader = new VCFFileReader(vcf_File);
-//        CloseableIterator<VariantContext> vc = vcfReader.query("Chromosome", 6000, 7000);
-//        List l;
-//        l = vc.toList();
-//        System.out.println();
-//        VariantContext var;
-//        var = (VariantContext) l.get(1);
-//        
-//        Allele al = var.getReference();
-//        System.out.println("Ref is " + al.getBaseString());
-//        List<Allele> listAl = var.getAlternateAlleles();
-//        
-//        for (Allele al2 : listAl){
-//            System.out.println("ALT is " + al2.getBaseString());
-//        }
+                int cluster_range = 100;
+                int min_cluster_member = 5;
+                int super_cluster_range = 1000;
+                int min_super_cluster_member = 2;
 
-//        CloseableIterator<VariantContext> vcf_info = vcfReader.iterator();
-//        int count = 0;
-//        while(vcf_info.hasNext()){
-//            VariantContext ctx = vcf_info.next();
-//            System.out.println(count++);
-//            
-//            List<Allele> al_list = ctx.getAlleles();
-//            List<Allele> alt_al_list = ctx.getAlternateAlleles();
-//            Allele al = alt_al_list.get(0);
-//            
-//            String base = al.getBaseString();
-//            String display = al.getDisplayString();
-//            int len = al.length();
-//            
-//            Map<String,Object> att = ctx.getAttributes();
-//            int end = ctx.getEnd();
-//            int start = ctx.getStart();
-//            GenotypesContext gn = ctx.getGenotypes();
-//            Allele ref_al = ctx.getReference();
-//            Set<String> name_list = ctx.getSampleNames();
-//            String src = ctx.getSource();
-//            StructuralVariantType sv_type = ctx.getStructuralVariantType();
-//            CommonInfo cm = ctx.getCommonInfo();
-//            int num_al = ctx.getNAlleles();
-//            int num_sample = ctx.getNSamples();
-//            double predQ = ctx.getPhredScaledQual();
-//            String mmm = ctx.toString();
-//            System.out.println();
-//            
-//        }
-        
-        ArrayList<MutationCluster> list_cluster = MutationUtility.SearchMutationClusterV2(vcfFileName,cluster_range,min_cluster_member);
-        ArrayList<MutationSuperCluster> list_super_cluster = MutationUtility.SearchSuperMutationClusterV2(list_cluster, super_cluster_range, min_super_cluster_member);
-        MutationUtility.exportClusterToBed(list_cluster, bed_saveFileName);
-        MutationUtility.exportSuperClusterToBed(list_super_cluster, bed_SuperCluster_saveFileName);
-        MutationUtility.exportClusterToCSV(list_cluster, csv_cluster_saveFileName);
-        MutationUtility.exportSuperClusterToCSV(list_super_cluster, csv_SuperCluster_saveFileName);
+//                File input_file = new File(vcfFileName);
+                String file_name = input_file.getName();
+                String sampleName = file_name.split("_")[0];
+                String path = input_file.getParent();
+                String bed_saveFileName = path+"/"+sampleName+"_cluster.bed";
+                String bed_SuperCluster_saveFileName = path+"/"+sampleName+"_super_cluster.bed";
+                String csv_cluster_saveFileName = path+"/"+sampleName+"_cluster.csv";
+                String csv_SuperCluster_saveFileName = path+"/"+sampleName+"_super_cluster.csv";
+                String csv_trinucleotide_analysis_aveFileName = path+"/"+sampleName+"_trinucleotide.csv";
+        //        File vcf_File = new File(vcfFileName);
+        //        VCFFileReader vcfReader = new VCFFileReader(vcf_File);
+        //        CloseableIterator<VariantContext> vc = vcfReader.query("Chromosome", 6000, 7000);
+        //        List l;
+        //        l = vc.toList();
+        //        System.out.println();
+        //        VariantContext var;
+        //        var = (VariantContext) l.get(1);
+        //        
+        //        Allele al = var.getReference();
+        //        System.out.println("Ref is " + al.getBaseString());
+        //        List<Allele> listAl = var.getAlternateAlleles();
+        //        
+        //        for (Allele al2 : listAl){
+        //            System.out.println("ALT is " + al2.getBaseString());
+        //        }
 
-        MutationSNV muSNV = MutationUtility.analyseTrinucleotide(vcfFileName, refFileName);
-        muSNV.exportTrinucleotideFrequencyToCSVFile(csv_trinucleotide_analysis_aveFileName);
-        
-        System.out.println();
+        //        CloseableIterator<VariantContext> vcf_info = vcfReader.iterator();
+        //        int count = 0;
+        //        while(vcf_info.hasNext()){
+        //            VariantContext ctx = vcf_info.next();
+        //            System.out.println(count++);
+        //            
+        //            List<Allele> al_list = ctx.getAlleles();
+        //            List<Allele> alt_al_list = ctx.getAlternateAlleles();
+        //            Allele al = alt_al_list.get(0);
+        //            
+        //            String base = al.getBaseString();
+        //            String display = al.getDisplayString();
+        //            int len = al.length();
+        //            
+        //            Map<String,Object> att = ctx.getAttributes();
+        //            int end = ctx.getEnd();
+        //            int start = ctx.getStart();
+        //            GenotypesContext gn = ctx.getGenotypes();
+        //            Allele ref_al = ctx.getReference();
+        //            Set<String> name_list = ctx.getSampleNames();
+        //            String src = ctx.getSource();
+        //            StructuralVariantType sv_type = ctx.getStructuralVariantType();
+        //            CommonInfo cm = ctx.getCommonInfo();
+        //            int num_al = ctx.getNAlleles();
+        //            int num_sample = ctx.getNSamples();
+        //            double predQ = ctx.getPhredScaledQual();
+        //            String mmm = ctx.toString();
+        //            System.out.println();
+        //            
+        //        }
+
+                ArrayList<MutationCluster> list_cluster = MutationUtility.SearchMutationClusterV2(vcfFileName,cluster_range,min_cluster_member);
+                ArrayList<MutationSuperCluster> list_super_cluster = MutationUtility.SearchSuperMutationClusterV2(list_cluster, super_cluster_range, min_super_cluster_member);
+                MutationUtility.exportClusterToBed(list_cluster, bed_saveFileName);
+                MutationUtility.exportSuperClusterToBed(list_super_cluster, bed_SuperCluster_saveFileName);
+                MutationUtility.exportClusterToCSV(list_cluster, csv_cluster_saveFileName);
+                MutationUtility.exportSuperClusterToCSV(list_super_cluster, csv_SuperCluster_saveFileName);
+
+                System.out.println();
+            }
+        }
         
     }
     

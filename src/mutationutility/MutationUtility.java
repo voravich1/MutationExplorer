@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
@@ -728,6 +729,72 @@ public class MutationUtility {
             muSNV.addTrinucleotideVariantContext(leftBase.getBaseString(), rightBase.getBaseString(), varctx);
         }
         return muSNV;
+    }
+    
+    public static void analyseTrinucleotideMultiple(String vcfFileFolder, String refFilePath) throws FileNotFoundException, IOException{
+        String saveMultipleFileName = vcfFileFolder + File.separator + "sum_trinucleotide.csv";
+        /**
+         * Read reference fasta file
+         */
+        File ref_File = new File(refFilePath);
+        IndexedFastaSequenceFile ref = new IndexedFastaSequenceFile(ref_File);
+//        FastaSequenceFile ref = new FastaSequenceFile(ref_File,true);
+        /****************************/
+        
+        /**
+         * Initiate Mutation SNV for multiple
+         */
+        MutationSNV muSNVMultiple = new MutationSNV("sum_Mutation_SNV");
+        /****************************/
+        
+        /**
+         * Loop through directory
+         * consider only file with vcf extension
+         */
+        File vcfDir = new File(vcfFileFolder);
+        final FileNameExtensionFilter extensionFilter = new FileNameExtensionFilter("vcf only","vcf");
+        if(vcfDir.isDirectory()){
+            
+        }else{
+            System.out.println("ERROR: Iput is not directory. Please specify vcf file directory");
+            System.exit(1);
+        }
+        
+        for (final File vcf_File : vcfDir.listFiles()) {
+            if(extensionFilter.accept(vcf_File) && !vcf_File.isDirectory()) {
+                /**
+                * Read vcf file
+                */
+                VCFFileReader vcfReader = new VCFFileReader(vcf_File);
+                /****************************/
+                
+                /**
+                 * Loop through vcf
+                 * analyse mutation SNV
+                 */
+                String name_of_file = vcf_File.getName();
+                String fileName = name_of_file.split("\\.")[0];
+                String saveSingleFileName = vcfFileFolder + File.separator + fileName+"_trinucleotide.csv";
+                
+                MutationSNV muSNVSingle = new MutationSNV(name_of_file);
+
+                CloseableIterator<VariantContext> vcf_info = vcfReader.iterator();
+                while(vcf_info.hasNext()){  // loop all variant
+
+                    VariantContext varctx = vcf_info.next();
+
+                    int POS = varctx.getStart();
+                    String contig = varctx.getContig();
+                    ReferenceSequence leftBase = ref.getSubsequenceAt(contig, POS-1, POS-1);
+                    ReferenceSequence rightBase = ref.getSubsequenceAt(contig, POS+1, POS+1);
+
+                    muSNVSingle.addTrinucleotideVariantContext(leftBase.getBaseString(), rightBase.getBaseString(), varctx);
+                    muSNVMultiple.addTrinucleotideVariantContext(leftBase.getBaseString(), rightBase.getBaseString(), varctx);
+                }
+                muSNVSingle.exportTrinucleotideFrequencyToCSVFile(saveSingleFileName);
+            }
+        }
+        muSNVMultiple.exportTrinucleotideFrequencyToCSVFile(saveMultipleFileName);
     }
     
 }

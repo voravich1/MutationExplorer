@@ -48,6 +48,7 @@ public class MutationSNV {
     private String sampleName;
     
     public MutationSNV(){        
+        this.sampleName = "MutationSNV";
         /**
          * initiate trinucleotide matrix
          * innerMap key is 3' base (left base of target position)
@@ -170,6 +171,12 @@ public class MutationSNV {
         
         String threePrimeBase = inThreePrimeBase.toUpperCase();
         String fivePrimeBase = inFivePrimeBase.toUpperCase();
+        
+        if(threePrimeBase.equals("N") || fivePrimeBase.equals("N")){
+            // check weather 3' or 5' base is N or not. We ignore the case that base is N
+            return;
+        }
+        
         List<Allele> list_alleles = inVarCtx.getAlleles();
         String ref_base = inVarCtx.getReference().getBaseString().toUpperCase();
         for(Allele ale : list_alleles){
