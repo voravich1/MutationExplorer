@@ -51,8 +51,8 @@ public class MutationSNV {
         this.sampleName = "MutationSNV";
         /**
          * initiate trinucleotide matrix
-         * innerMap key is 3' base (left base of target position)
-         * trinucleotideMatrix key is 5' base (right base of target position)
+         * innerMap key is 3' base (right base of target position)
+         * trinucleotideMatrix key is 5' base (left base of target position)
          */
 //        LinkedHashMap<String,ArrayList<VariantContext>> innerMap = new LinkedHashMap();
 //        ArrayList<VariantContext> listVarCtx = new ArrayList();
@@ -124,8 +124,8 @@ public class MutationSNV {
         this.sampleName = sampleName;
         /**
          * initiate trinucleotide matrix
-         * innerMap key is 3' base (left base of target position)
-         * trinucleotideMatrix key is 5' base (right base of target position)
+         * innerMap key is 3' base (right base of target position)
+         * trinucleotideMatrix key is 5' base (left base of target position)
          */
         this.trinucleotideMatrixCA = new TreeMap();
         this.trinucleotideMatrixCG = new TreeMap();
@@ -167,10 +167,10 @@ public class MutationSNV {
         return mutationType;
     }
     
-    public void addTrinucleotideVariantContext(String inThreePrimeBase, String inFivePrimeBase, VariantContext inVarCtx){
+    public void addTrinucleotideVariantContext(String inLeftBase, String inRightBase, VariantContext inVarCtx){
         
-        String threePrimeBase = inThreePrimeBase.toUpperCase();
-        String fivePrimeBase = inFivePrimeBase.toUpperCase();
+        String fivePrimeBase = inLeftBase.toUpperCase();
+        String threePrimeBase = inRightBase.toUpperCase();        
         
         if(threePrimeBase.equals("N") || fivePrimeBase.equals("N")){
             // check weather 3' or 5' base is N or not. We ignore the case that base is N

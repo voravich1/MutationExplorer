@@ -20,6 +20,7 @@ public class TestBed {
         String saveFile = "/Users/worawich/Download_dataset/Ratina_cancer/Mutect_dnabrick_result/set1_dnabrick/555_trinucleotide.csv";
         
         String vcfDir = "/Users/worawich/Download_dataset/Ratina_cancer/Mutect_dnabrick_result/set1_dnabrick";
+//        String vcfDir = "/Users/worawich/Download_dataset/Ratina_cancer/Mutect_dnabrick_result/test";
         
 //        MutationSNV muSNV = MutationUtility.analyseTrinucleotide(vcfFileName, refFileName);
 //        muSNV.exportTrinucleotideFrequencyToCSVFile(saveFile);
