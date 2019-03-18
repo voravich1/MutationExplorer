@@ -12,6 +12,8 @@ import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.samtools.reference.FastaSequenceFile;
 import htsjdk.samtools.reference.IndexedFastaSequenceFile;
 import htsjdk.samtools.reference.ReferenceSequence;
+import htsjdk.variant.vcf.VCFContigHeaderLine;
+import htsjdk.variant.vcf.VCFHeader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -19,6 +21,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
@@ -28,6 +32,178 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class MutationUtility {
     
     public static ArrayList<MutationCluster> SearchMutationCluster(String vcfFile, int range, int cluster_size_filter){
+        /**
+         * V1 will search cluster with possibility overlap member 
+         */
+        
+        File vcf_File = new File(vcfFile);
+        VCFFileReader vcfReader = new VCFFileReader(vcf_File);
+        CloseableIterator<VariantContext> vcf_info = vcfReader.iterator();
+        
+        ArrayList<MutationCluster> list_cluster = new ArrayList();
+        
+        int leader_start = 0;
+        int leader_stop = 0;
+        
+        int member_start = 0;
+        int member_stop = 0;
+        
+        String leader_chr = "";
+        String member_chr = "";
+        
+        int diff = 0;
+        
+        int count = 0;
+        
+        MutationCluster dummy_cluster = new MutationCluster();
+        dummy_cluster.setMax_variant_size(range);
+        
+        while(vcf_info.hasNext()){  // loop all variant
+            
+            VariantContext varctx = vcf_info.next();
+            
+            if(count==0){
+                /**
+                 * For first time
+                 */
+                leader_start = varctx.getStart();
+                leader_stop = varctx.getEnd();
+                leader_chr = varctx.getContig();
+                dummy_cluster.addVariant(varctx);
+                dummy_cluster.addLeaderStart(leader_start);
+                dummy_cluster.addLeaderStop(leader_stop);
+                dummy_cluster.setCluster_chr(leader_chr);
+                count=1;
+            }else{
+                /**
+                 * For other line
+                 */
+                member_start = varctx.getStart();
+                member_stop = varctx.getEnd();
+                member_chr = varctx.getContig();
+                diff = member_start - leader_start;
+                
+                if(leader_chr.equals(member_chr)){
+                    /**
+                     * leader and current var has the same chromosome
+                     * Check position
+                     */
+                    if(diff <= range){
+                        dummy_cluster.addVariant(varctx);
+                    }else{
+                        /*
+                            New var not match with leader of cluster
+                            Save old cluster and create new cluster (save only cluster that has member more than 1)
+                        */
+                        if(dummy_cluster.getClusterSize() >= cluster_size_filter){
+                            MutationCluster save_cluster = new MutationCluster();
+                            ArrayList<VariantContext> save_cluster_list = new ArrayList<VariantContext>(dummy_cluster.getVarList());
+                            save_cluster.setVarList(save_cluster_list);
+                            save_cluster.addLeaderStart(dummy_cluster.getLeader_start());
+                            save_cluster.addLeaderStop(dummy_cluster.getLeader_stop());
+                            save_cluster.setCluster_chr(dummy_cluster.getCluster_chr());
+                            save_cluster.setMax_variant_size(range);
+                            list_cluster.add(save_cluster);
+                        }
+
+                        if(diff > (2*range)){
+                            /*
+                                New var is to far from every member in old cluster
+                                Initiate new cluster and use current var as leader
+                                No need to compare with other member
+                            */
+                            leader_start = member_start;
+                            leader_stop = member_stop;
+                            leader_chr = member_chr;
+                            dummy_cluster = new MutationCluster();
+                            dummy_cluster.addVariant(varctx);
+                            dummy_cluster.addLeaderStart(leader_start);
+                            dummy_cluster.addLeaderStop(leader_stop);
+                            dummy_cluster.setCluster_chr(leader_chr);
+                            dummy_cluster.setMax_variant_size(range);
+                        }else{
+                            /*
+                                New var is far from leader but not far from other member
+                                Use other member as leader (start from second)
+                            */
+                            while(dummy_cluster.getClusterSize()>1){
+                                /**
+                                 * loop all member and compare with new var
+                                 */
+                                dummy_cluster.removeLeader();
+                                leader_start = dummy_cluster.getLeader_start();
+                                leader_stop = dummy_cluster.getLeader_stop();
+
+                                diff = member_start - leader_start;
+
+                                if(diff <= range){
+                                    /**
+                                     * current var is in range when compare to one of member
+                                     * add current var to the cluster
+                                     */
+                                    dummy_cluster.addVariant(varctx);
+                                    break;
+                                }                                                            
+                            }
+
+                            if(dummy_cluster.getClusterSize()==1){
+                                /*
+                                    Current cluster has no member
+                                    Create new cluster, use current var as leader
+                                */
+                                leader_start = member_start;
+                                leader_stop = member_stop;
+                                leader_chr = member_chr;
+                                dummy_cluster = new MutationCluster();
+                                dummy_cluster.addVariant(varctx);
+                                dummy_cluster.addLeaderStart(leader_start);
+                                dummy_cluster.addLeaderStop(leader_stop);
+                                dummy_cluster.setCluster_chr(leader_chr);
+                                dummy_cluster.setMax_variant_size(range);
+                            }
+                        }  
+                    }
+                }else{
+                    /**
+                     * leader and current var has different in chromosome
+                     * Save cluster and create new cluster using current var as leader
+                     */
+                    if(dummy_cluster.getClusterSize() >= cluster_size_filter){
+                        MutationCluster save_cluster = new MutationCluster();
+                        ArrayList<VariantContext> save_cluster_list = new ArrayList<VariantContext>(dummy_cluster.getVarList());
+                        save_cluster.setVarList(save_cluster_list);
+                        save_cluster.addLeaderStart(dummy_cluster.getLeader_start());
+                        save_cluster.addLeaderStop(dummy_cluster.getLeader_stop());
+                        save_cluster.setCluster_chr(dummy_cluster.getCluster_chr());
+                        save_cluster.setMax_variant_size(range);
+                        list_cluster.add(save_cluster);
+                    }
+                    
+                    leader_start = member_start;
+                    leader_stop = member_stop;
+                    leader_chr = member_chr;
+                    dummy_cluster = new MutationCluster();
+                    dummy_cluster.addVariant(varctx);
+                    dummy_cluster.addLeaderStart(leader_start);
+                    dummy_cluster.addLeaderStop(leader_stop);
+                    dummy_cluster.setCluster_chr(leader_chr);
+                    dummy_cluster.setMax_variant_size(range);
+                }
+                       
+            }
+        }
+        /**
+         * Save last cluster
+         */
+        if(dummy_cluster.getClusterSize() >= cluster_size_filter){
+            list_cluster.add(dummy_cluster);
+        }
+        
+        System.out.print("done");
+        return list_cluster; 
+    }
+    
+    public static ArrayList<MutationCluster> SearchMutationClusterPlusNearBreakpoint(String vcfSVFile, String vcfFile, int range, int cluster_size_filter){
         /**
          * V1 will search cluster with possibility overlap member 
          */
@@ -682,18 +858,51 @@ public class MutationUtility {
         writer.close();
     }
     
-    public static void readMantaVCF(String vcfFileName){
+    public static MutationBinaryTree convertVCFToMutationBinaryTree(String vcfFileName){
         File vcf_File = new File(vcfFileName);
         VCFFileReader vcf = new VCFFileReader(vcf_File);
         
+        MutationBinaryTree muTree = new MutationBinaryTree();
+        ArrayList<Long> muBinaryTree = new ArrayList();
+        LinkedHashMap<Long,VariantContext> muMap = new LinkedHashMap();
+        LinkedHashMap<String,Integer> mapContigToChrCode = new LinkedHashMap();
+        LinkedHashMap<Integer,String> mapChrCodeToContig = new LinkedHashMap();
+        
         CloseableIterator<VariantContext> vcf_Iter = vcf.iterator();
+        VCFHeader vcf_Header = vcf.getFileHeader();
+        List<VCFContigHeaderLine> listContig = vcf_Header.getContigLines();
+        
+        int chrCode = 1 ;
+        for(VCFContigHeaderLine vcf_Contig : listContig){            
+            mapContigToChrCode.put(vcf_Contig.getValue(), chrCode);
+            mapChrCodeToContig.put(chrCode, vcf_Contig.getValue());
+            chrCode++;
+        }
+        
         
         while(vcf_Iter.hasNext()){      // loop all variant
             VariantContext vcfContext = vcf_Iter.next();    
             
-            vcfContext.getAllele(vcfFileName);
+            String contig = vcfContext.getContig();
+            int chr = mapContigToChrCode.get(contig);
+            int start = vcfContext.getStart();
+            int stop = vcfContext.getEnd();
+            long chrPosStart = (chr<<28)+start;
+            long chrPosStop = (chr<<28)+stop;
             
+            muBinaryTree.add(chrPosStart);
+            muBinaryTree.add(chrPosStop);
+            
+            muMap.put(chrPosStart, vcfContext);
+            muMap.put(chrPosStop, vcfContext);
         }
+        
+        muTree.setMapContigToChrCode(mapContigToChrCode);
+        muTree.setMapChrCodeToContig(mapChrCodeToContig);
+        muTree.setMutationBinaryTree(muBinaryTree);
+        muTree.setMutationMap(muMap);
+        
+        return muTree;
     }
     
     public static MutationSNV analyseTrinucleotide(String vcfFilePath, String refFilePath) throws FileNotFoundException{
