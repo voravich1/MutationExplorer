@@ -9,9 +9,13 @@ package mutationutility;
  *
  * @author worawich
  */
-public class MantaVariant {
+public class MutationSV {
     
-    public MantaVariant(){
+    
+    
+    
+    
+    public MutationSV(){
         
     }
     

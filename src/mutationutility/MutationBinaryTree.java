@@ -72,12 +72,17 @@ public class MutationBinaryTree {
          * If chrPosStop not match, we will return -1 (this match pattern is not in the range of any annotation)
          * 
          */
-        
+        VariantContext varCtx;
         int posMask = 268435455;        // 28 bit mask (AND operation with this mask to get position)
         int iniPoint = 0;
         int lastPoint = this.mutationBinaryTree.size()-1;
         int midPoint = (lastPoint + iniPoint)/2;
         long compareChrPos;
+        
+        int chrStart = (int)(chrPosStart>>28);
+        int posStart = (int)(chrPosStart&posMask);
+        int chrStop = (int)(chrPosStop>>28);
+        int posStop = (int)(chrPosStop&posMask);
         
         VariantContext varCtxStart;
         VariantContext varCtxStop;
@@ -115,6 +120,37 @@ public class MutationBinaryTree {
         
         
         if(status=='l'){
+            
+            long codeLeft = this.mutationBinaryTree.get(midPoint-1);
+            int chrLeft = (int)(codeLeft>>28);
+            int posLeft = (int)(codeLeft&posMask);
+            int diffLeft = Math.abs(posLeft - posStart);
+            
+            long codeRight = this.mutationBinaryTree.get(midPoint);
+            int chrRight = (int)(codeRight>>28);
+            int posRight = (int)(codeRight&posMask);
+            int diffRight = Math.abs(posRight - posStart);
+            
+            if(chrLeft == chrStart && chrRight == chrStart){
+                
+                if(diffLeft > diffRight){
+                    // right SV is nearest to cluster. save right SV
+                    varCtx = this.mutationMap.get(codeRight);
+                }else if(diffLeft < diffRight){
+                    // left SV is nearest to cluster. save left SV
+                    varCtx = this.mutationMap.get(codeLeft);
+                }else if(diffLeft == diffRight){
+                    // Both right and left SV is nearest to cluster. save both
+                    ArrayList<VariantContext> add two var
+                }//***************** Hold all code HERE. Stuck on logic for nearest finding
+                
+            }else if(chrLeft == chrStart && chrRight != chrStart){
+                // right SV is on different chromosome
+                
+            }else if(chrLeft != chrStart && chrRight == chrStart){
+                
+            }
+            
             if(midPoint == 0){
                 
                 /**
